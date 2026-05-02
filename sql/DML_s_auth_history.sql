@@ -1,0 +1,20 @@
+/* Заполняем сателит-таблицу s_auth_history. */
+INSERT INTO VT25110761DD38__DWH.s_auth_history (
+	hk_l_user_group_activity,
+	user_id_from,
+	event,
+	event_dt,
+	load_dt,
+	load_src
+)
+SELECT DISTINCT
+	luga.hk_l_user_group_activity,
+	gl.user_id_from,
+	gl.event,
+	gl.datetime AS event_dt,
+	NOW() AS load_dt,
+	'S3' AS load_src
+FROM VT25110761DD38__STAGING.group_log AS gl
+LEFT JOIN VT25110761DD38__DWH.h_users AS hu ON gl.user_id = hu.user_id
+LEFT JOIN VT25110761DD38__DWH.h_groups AS hg ON gl.group_id = hg.group_id
+LEFT JOIN VT25110761DD38__DWH.l_user_group_activity AS luga ON hu.hk_user_id = luga.hk_user_id AND hg.hk_group_id = luga.hk_group_id;
